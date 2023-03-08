@@ -16,6 +16,13 @@ router.get('/', (req, res) => {
 
 })
 
+// try to authenticate a user via the login route
+router.post("/login", (req, res) => {
+  console.log('hit the login route');
+
+  res.json({message: 'working'});
+})
+
 // retrieve all users from a database
 router.get('/users', (req, res) => {
     pool.getConnection(function(err, connection) {
@@ -28,6 +35,18 @@ router.get('/users', (req, res) => {
        
           // Handle error after the release.
           if (error) throw error;
+
+          results.forEach(user => {
+            // sanitize our data a bit - get rid of stuff that shouldn't be public
+            delete user.password;
+            delete user.fname;
+            delete user.lname;
+
+            // if there's no avatar, set a default
+            if (!user.avatar) {
+              user.avatar = "temp_avatar.jpg";
+            }
+          })
        
           // Don't use the connection here, it has been returned to the pool.
           res.json(results);
